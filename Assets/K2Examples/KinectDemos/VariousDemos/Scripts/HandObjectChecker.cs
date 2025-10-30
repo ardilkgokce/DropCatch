@@ -38,8 +38,8 @@ public class HandObjectChecker : MonoBehaviour
 	private Rect rectObjectHandLeft = new Rect();
 	private Rect rectObjectHandRight = new Rect();
 
-	private float fillRatioLeftHand = 0f;
-	private float fillRatioRightHand = 0f;
+	public float fillRatioLeftHand = 0f;
+	public float fillRatioRightHand = 0f;
 
 //	private Vector3 sizeObjectHandLeft = Vector3.zero;
 //	private Vector3 sizeObjectHandRight = Vector3.zero;
