@@ -8,25 +8,26 @@ public class BasketController2D : MonoBehaviour
     
     [Header("Sepet Ayarları")]
     public Transform basket2D;
-    public float moveSpeed = 8f;
     public float horizontalRange = 8f;
     public SpriteRenderer basketSprite;
     
-    [Header("Kalibrasyon")]
-    public bool isCalibrated = false;
-    private float centerOffset = 0f;
     
     [Header("Hareket Ayarları")]
     [Tooltip("Kinect koordinat scale faktörü")]
     public float coordinateScale = 5f;
-    [Tooltip("Pozisyon smoothing hızı")]
-    public float smoothingSpeed = 12f;
+    
+    [Tooltip("Hareket hassasiyet çarpanı (0.1 = çok yavaş, 1 = normal, 2 = hızlı)")]
+    [Range(0.1f, 2f)]
+    public float movementSensitivity = 1f;
+    
+    [Tooltip("Smoothing hızı (1 = smoothing yok, 20 = çok smooth)")]
+    [Range(1f, 20f)]
+    public float smoothingSpeed = 10f;
     
     [Header("Görsel Feedback")]
     public Color normalColor = Color.white;
     public Color holdingColor = Color.green;
     public Color notDetectedColor = Color.red;
-    public Color bothHandsDetectedColor = Color.blue;
     
     private bool isHoldingBasket = false;
     
@@ -60,14 +61,13 @@ public class BasketController2D : MonoBehaviour
         UpdateVisualFeedback();
     }
     
-    
     float CalculateTargetPosition()
     {
-        // PhysicalBasketDetector'dan smoothed pozisyonu al
+        // PhysicalBasketDetector'dan pozisyonu al (zaten world space'de)
         Vector3 basketPosition = basketDetector.BasketCenterPosition;
         
-        // Kinect koordinatlarını oyun koordinatlarına çevir
-        float targetX = (basketPosition.x - centerOffset) * coordinateScale;
+        // Kinect koordinatlarını oyun koordinatlarına çevir ve hassasiyet çarpanını uygula
+        float targetX = basketPosition.x * coordinateScale * movementSensitivity;
         
         return targetX;
     }
@@ -76,13 +76,13 @@ public class BasketController2D : MonoBehaviour
     {
         Vector2 currentPos = basket2D.position;
         
-        // Sepet tutuluyorsa daha responsive, tutulmuyorsa daha smooth hareket
-        float lerpSpeed = isHoldingBasket ? smoothingSpeed : smoothingSpeed * 0.6f;
-        float newX = Mathf.Lerp(currentPos.x, targetX, lerpSpeed * Time.deltaTime);
+        // Hedef pozisyonu sınırlar içinde tut
+        targetX = Mathf.Clamp(targetX, -horizontalRange, horizontalRange);
         
-        // Sınırlar içinde tut
-        newX = Mathf.Clamp(newX, -horizontalRange, horizontalRange);
+        // Basit smoothing uygula
+        float newX = Mathf.Lerp(currentPos.x, targetX, smoothingSpeed * Time.deltaTime);
         
+        // Pozisyonu güncelle
         basket2D.position = new Vector2(newX, currentPos.y);
     }
     
@@ -94,32 +94,10 @@ public class BasketController2D : MonoBehaviour
         }
         else
         {
-            // 2 el görünüyor mu kontrol et
-            long userId = kinectManager.GetPrimaryUserID();
-            bool leftTracked = kinectManager.IsJointTracked(userId, (int)KinectInterop.JointType.HandLeft);
-            bool rightTracked = kinectManager.IsJointTracked(userId, (int)KinectInterop.JointType.HandRight);
-            
-            if (leftTracked && rightTracked)
-            {
-                basketSprite.color = bothHandsDetectedColor; // Mavi - 2 el görünüyor ama yeşil state değil
-            }
-            else
-            {
-                basketSprite.color = normalColor; // Beyaz - normal durum
-            }
+            basketSprite.color = normalColor; // Beyaz - normal durum
         }
     }
     
-    public void Calibrate()
-    {
-        if(!kinectManager || !kinectManager.IsUserDetected() || !basketDetector)
-            return;
-        
-        // PhysicalBasketDetector'dan center pozisyonu al
-        centerOffset = basketDetector.GetCenterXOffset();
-        isCalibrated = true;
-        Debug.Log("2D Kalibrasyon OK! Offset: " + centerOffset);
-    }
     
     // Debug ve monitoring için public methodlar
     public bool IsBasketBeingHeld()

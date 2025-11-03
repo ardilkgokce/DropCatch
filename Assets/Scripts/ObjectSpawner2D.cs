@@ -46,8 +46,5 @@ public class ObjectSpawner2D : MonoBehaviour
         // Nesneyi oluştur
         GameObject obj = Instantiate(prefab, spawnPos, Quaternion.identity);
         
-        // Opsiyonel: Rastgele boyut
-        float scale = Random.Range(0.8f, 1.2f);
-        obj.transform.localScale = Vector3.one * scale;
     }
 }

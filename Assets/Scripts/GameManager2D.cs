@@ -11,8 +11,6 @@ public class GameManager2D : MonoBehaviour
     public TextMeshProUGUI scoreText;
     public TextMeshProUGUI timerText;
     public TextMeshProUGUI comboText;
-    public GameObject calibrationPanel;
-    public TextMeshProUGUI calibrationText;
     
     [Header("Oyun Ayarları")]
     public float gameDuration = 60f;
@@ -41,38 +39,24 @@ public class GameManager2D : MonoBehaviour
         spawner = FindObjectOfType<ObjectSpawner2D>();
         spawner.enabled = false;
         
-        StartCoroutine(CalibrationRoutine());
+        StartCoroutine(WaitForUserAndStart());
     }
     
-    IEnumerator CalibrationRoutine()
+    IEnumerator WaitForUserAndStart()
     {
-        calibrationPanel.SetActive(true);
-        calibrationText.text = "Kinect'in önünde ortada durun";
-        
         // Kullanıcı algılanana kadar bekle
         while(!KinectManager.Instance || !KinectManager.Instance.IsUserDetected())
         {
             yield return new WaitForSeconds(0.1f);
         }
         
-        calibrationText.text = "Kullanıcı algılandı!\nFiziksel sepeti iki elinizle tutun ve SPACE'e basın";
-        
-        // Kalibrasyon için bekle
-        while(!basketController.isCalibrated)
-        {
-            if(Input.GetKeyDown(KeyCode.Space))
-            {
-                basketController.Calibrate();
-                yield return new WaitForSeconds(1f);
-                StartGame();
-            }
-            yield return null;
-        }
+        // Kullanıcı algılandı, oyunu başlat
+        yield return new WaitForSeconds(1f); // Kısa bir bekleme
+        StartGame();
     }
     
     void StartGame()
     {
-        calibrationPanel.SetActive(false);
         spawner.enabled = true;
         gameStarted = true;
         timeRemaining = gameDuration;
@@ -133,14 +117,17 @@ public class GameManager2D : MonoBehaviour
         gameStarted = false;
         spawner.enabled = false;
         
-        // Oyun sonu ekranı
-        calibrationPanel.SetActive(true);
-        calibrationText.text = $"Oyun Bitti!\nSkorunuz: {score}\nTekrar oynamak için SPACE";
+        // Oyun sonu - sadece spawner'ı durdur
+        Debug.Log($"Oyun Bitti! Skor: {score}");
         
-        if(Input.GetKeyDown(KeyCode.Space))
-        {
-            UnityEngine.SceneManagement.SceneManager.LoadScene(
-                UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
-        }
+        // TODO: Oyun sonu UI'ı eklenebilir
+        StartCoroutine(RestartGameAfterDelay());
+    }
+    
+    IEnumerator RestartGameAfterDelay()
+    {
+        yield return new WaitForSeconds(3f);
+        UnityEngine.SceneManagement.SceneManager.LoadScene(
+            UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
     }
 }
