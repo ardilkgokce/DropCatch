@@ -8,34 +8,40 @@ public class MenuManager : MonoBehaviour
 {
     [Header("Panel Referansları")]
     public GameObject menuPanel;
-    public GameObject leaderboardPanel;
-    public GameObject registrationPanel;
+    public GameObject gameOverPanel;
     
     [Header("Kayıt Form Elemanları")]
     public TMP_InputField nameInput;
-    public TMP_InputField phoneInput;
+    public TMP_InputField emailInput;
     public Button startButton;
     public TextMeshProUGUI errorText;
     
-    [Header("Liderlik Tablosu")]
-    public Transform leaderboardContent;
-    public GameObject leaderboardEntryPrefab;
+    [Header("Oyun Bitiş")]
+    public TextMeshProUGUI[] leaderboardTexts; // 10 adet text (1. den 10. ya kadar)
+    public float gameOverTimeout = 10f; // Otomatik dönüş süresi
     
-    [Header("Oyun Bitiş Efektleri")]
-    public GameObject gameOverPanel;
-    public TextMeshProUGUI finalScoreText;
-    public ParticleSystem confettiEffect;
-    public AudioSource gameOverAudio;
-    public AudioClip successSound;
+    [Header("Menü Liderlik Tablosu")]
+    public TextMeshProUGUI[] menuLeaderboardTexts; // MenuPanel'deki 10 adet text
     
-    private LeaderboardManager leaderboardManager;
+    private JsonLeaderboardManager leaderboardManager;
     private GameManager2D gameManager;
     private string currentPlayerName;
-    private string currentPlayerPhone;
+    private string currentPlayerEmail;
+    private Coroutine gameOverCoroutine;
     
     void Start()
     {
-        leaderboardManager = GetComponent<LeaderboardManager>();
+        // Önce eski LeaderboardManager varsa deaktif et
+        LeaderboardManager oldManager = GetComponent<LeaderboardManager>();
+        if (oldManager) oldManager.enabled = false;
+        
+        // JsonLeaderboardManager'ı ekle veya al
+        leaderboardManager = GetComponent<JsonLeaderboardManager>();
+        if (!leaderboardManager)
+        {
+            leaderboardManager = gameObject.AddComponent<JsonLeaderboardManager>();
+        }
+        
         gameManager = GameManager2D.Instance;
         
         // UI başlangıç durumu
@@ -66,10 +72,10 @@ public class MenuManager : MonoBehaviour
         
         // Input field listener'ları
         if (nameInput) nameInput.onValueChanged.AddListener(OnInputChanged);
-        if (phoneInput) phoneInput.onValueChanged.AddListener(OnInputChanged);
+        if (emailInput) emailInput.onValueChanged.AddListener(OnInputChanged);
         
-        // Liderlik tablosunu güncelle
-        UpdateLeaderboardUI();
+        // Menü liderlik tablosunu güncelle
+        UpdateMenuLeaderboard();
         
         // Error text'i temizle
         if (errorText) errorText.text = "";
@@ -91,7 +97,7 @@ public class MenuManager : MonoBehaviour
         Debug.Log("Test Start Button çağrıldı!");
         // Test için form alanlarını doldur
         if (nameInput) nameInput.text = "Test Oyuncu";
-        if (phoneInput) phoneInput.text = "5551234567";
+        if (emailInput) emailInput.text = "test@email.com";
         // Butona tıkla
         OnStartButtonClicked();
     }
@@ -108,7 +114,7 @@ public class MenuManager : MonoBehaviour
         
         // Oyuncu bilgilerini kaydet (boş olsa bile)
         currentPlayerName = string.IsNullOrEmpty(nameInput.text.Trim()) ? "Misafir" : nameInput.text.Trim();
-        currentPlayerPhone = string.IsNullOrEmpty(phoneInput.text.Trim()) ? "0000000000" : phoneInput.text.Trim();
+        currentPlayerEmail = string.IsNullOrEmpty(emailInput.text.Trim()) ? "misafir@email.com" : emailInput.text.Trim();
         Debug.Log($"MenuManager: Starting game for player: {currentPlayerName}");
         
         // Menüyü kapat ve oyunu başlat
@@ -118,7 +124,7 @@ public class MenuManager : MonoBehaviour
     bool ValidateForm()
     {
         string name = nameInput.text.Trim();
-        string phone = phoneInput.text.Trim();
+        string email = emailInput.text.Trim();
         
         if (string.IsNullOrEmpty(name))
         {
@@ -132,17 +138,16 @@ public class MenuManager : MonoBehaviour
             return false;
         }
         
-        if (string.IsNullOrEmpty(phone))
+        if (string.IsNullOrEmpty(email))
         {
-            ShowError("Lütfen telefon numaranızı girin!");
+            ShowError("Lütfen email adresinizi girin!");
             return false;
         }
         
-        // Basit telefon validasyonu (10-11 haneli)
-        string cleanPhone = System.Text.RegularExpressions.Regex.Replace(phone, @"\D", "");
-        if (cleanPhone.Length < 10 || cleanPhone.Length > 11)
+        // Basit email validasyonu
+        if (!email.Contains("@") || !email.Contains("."))
         {
-            ShowError("Geçerli bir telefon numarası girin!");
+            ShowError("Geçerli bir email adresi girin!");
             return false;
         }
         
@@ -198,41 +203,87 @@ public class MenuManager : MonoBehaviour
     public void OnGameEnded(int finalScore)
     {
         // Oyuncu verisini oluştur ve kaydet
-        PlayerData playerData = new PlayerData(currentPlayerName, currentPlayerPhone, finalScore);
+        PlayerData playerData = new PlayerData(currentPlayerName, currentPlayerEmail, finalScore);
         leaderboardManager.AddScore(playerData);
         
-        // Oyun bitiş efektlerini göster
-        StartCoroutine(ShowGameOverSequence(finalScore));
+        // Oyun bitiş ekranını göster
+        ShowGameOverScreen();
     }
     
-    IEnumerator ShowGameOverSequence(int score)
+    void ShowGameOverScreen()
     {
-        // Kısa bir bekleme
-        yield return new WaitForSeconds(1f);
-        
-        // Game over panelini göster
         if (gameOverPanel)
         {
             gameOverPanel.SetActive(true);
-            finalScoreText.text = $"Skorunuz: {score}";
+            UpdateGameOverLeaderboard();
             
-            // Konfeti efekti
-            if (confettiEffect) confettiEffect.Play();
-            
-            // Ses efekti
-            if (gameOverAudio && successSound)
+            // Timeout coroutine'ini başlat
+            if (gameOverCoroutine != null)
             {
-                gameOverAudio.PlayOneShot(successSound);
+                StopCoroutine(gameOverCoroutine);
+            }
+            gameOverCoroutine = StartCoroutine(GameOverTimeout());
+        }
+    }
+    
+    void UpdateGameOverLeaderboard()
+    {
+        List<PlayerData> topScores = leaderboardManager.GetTopScores();
+        
+        // 10 text'i güncelle
+        for (int i = 0; i < leaderboardTexts.Length; i++)
+        {
+            if (i < topScores.Count)
+            {
+                // "1. ARDIL GÖKÇE 960 PUAN" formatında
+                leaderboardTexts[i].text = $"{i + 1}. {topScores[i].name.ToUpper()} {topScores[i].score} PUAN";
+            }
+            else
+            {
+                // Boş yerler
+                leaderboardTexts[i].text = $"{i + 1}. ---------- --- PUAN";
+            }
+        }
+    }
+    
+    IEnumerator GameOverTimeout()
+    {
+        float elapsedTime = 0f;
+        
+        while (elapsedTime < gameOverTimeout)
+        {
+            // Herhangi bir tuşa basıldı mı kontrol et
+            if (Input.anyKeyDown)
+            {
+                Debug.Log("Tuşa basıldı, menüye dönülüyor");
+                break;
             }
             
-            // 3 saniye bekle
-            yield return new WaitForSeconds(3f);
-            
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+        
+        // Game over ekranını kapat ve menüye dön
+        ReturnToMenu();
+    }
+    
+    void ReturnToMenu()
+    {
+        // Game over panelini kapat
+        if (gameOverPanel)
+        {
             gameOverPanel.SetActive(false);
         }
         
-        // Liderlik tablosunu güncelle
-        UpdateLeaderboardUI();
+        // Coroutine'i temizle
+        if (gameOverCoroutine != null)
+        {
+            StopCoroutine(gameOverCoroutine);
+            gameOverCoroutine = null;
+        }
+        
+        // Menü liderlik tablosunu güncelle
+        UpdateMenuLeaderboard();
         
         // Menüyü tekrar göster
         menuPanel.SetActive(true);
@@ -245,110 +296,36 @@ public class MenuManager : MonoBehaviour
         }
         
         // Form alanlarını temizle
-        nameInput.text = "";
-        phoneInput.text = "";
+        if (nameInput) nameInput.text = "";
+        if (emailInput) emailInput.text = "";
         
         // Butonun aktif olduğundan emin ol
-        startButton.interactable = true;
+        if (startButton) startButton.interactable = true;
     }
     
-    void UpdateLeaderboardUI()
+    void UpdateMenuLeaderboard()
     {
-        // Eski girişleri temizle
-        foreach (Transform child in leaderboardContent)
-        {
-            Destroy(child.gameObject);
-        }
-        
-        // Liderlik tablosunu al ve göster
+        if (menuLeaderboardTexts == null || menuLeaderboardTexts.Length == 0)
+            return;
+            
         List<PlayerData> topScores = leaderboardManager.GetTopScores();
         
-        for (int i = 0; i < topScores.Count; i++)
+        // 10 text'i güncelle
+        for (int i = 0; i < menuLeaderboardTexts.Length && i < 10; i++)
         {
-            PlayerData data = topScores[i];
-            GameObject entry = CreateLeaderboardEntry(i + 1, data);
-            entry.transform.SetParent(leaderboardContent, false);
+            if (menuLeaderboardTexts[i] != null)
+            {
+                if (i < topScores.Count)
+                {
+                    // "1. ARDIL GÖKÇE 960 PUAN" formatında
+                    menuLeaderboardTexts[i].text = $"{i + 1}. {topScores[i].name.ToUpper()} {topScores[i].score} PUAN";
+                }
+                else
+                {
+                    // Boş yerler
+                    menuLeaderboardTexts[i].text = $"{i + 1}. ---------- --- PUAN";
+                }
+            }
         }
-        
-        // Boş yerleri doldur (10'a kadar)
-        for (int i = topScores.Count; i < 10; i++)
-        {
-            GameObject entry = CreateEmptyLeaderboardEntry(i + 1);
-            entry.transform.SetParent(leaderboardContent, false);
-        }
-    }
-    
-    GameObject CreateLeaderboardEntry(int rank, PlayerData data)
-    {
-        GameObject entry = new GameObject($"Entry_{rank}");
-        RectTransform rect = entry.AddComponent<RectTransform>();
-        rect.sizeDelta = new Vector2(400, 40);
-        
-        // Horizontal Layout Group ekle
-        HorizontalLayoutGroup layout = entry.AddComponent<HorizontalLayoutGroup>();
-        layout.childAlignment = TextAnchor.MiddleLeft;
-        layout.spacing = 20;
-        layout.padding = new RectOffset(10, 10, 5, 5);
-        
-        // Sıra numarası
-        GameObject rankObj = new GameObject("Rank");
-        TextMeshProUGUI rankText = rankObj.AddComponent<TextMeshProUGUI>();
-        rankText.text = $"{rank}.";
-        rankText.fontSize = 18;
-        rankText.fontStyle = FontStyles.Bold;
-        rankObj.transform.SetParent(entry.transform, false);
-        
-        // İsim
-        GameObject nameObj = new GameObject("Name");
-        TextMeshProUGUI nameText = nameObj.AddComponent<TextMeshProUGUI>();
-        nameText.text = data.name;
-        nameText.fontSize = 18;
-        nameObj.transform.SetParent(entry.transform, false);
-        
-        // Layout element ekle (genişlik kontrolü için)
-        LayoutElement nameLayout = nameObj.AddComponent<LayoutElement>();
-        nameLayout.preferredWidth = 200;
-        nameLayout.flexibleWidth = 1;
-        
-        // Skor
-        GameObject scoreObj = new GameObject("Score");
-        TextMeshProUGUI scoreText = scoreObj.AddComponent<TextMeshProUGUI>();
-        scoreText.text = data.score.ToString();
-        scoreText.fontSize = 18;
-        scoreText.fontStyle = FontStyles.Bold;
-        scoreText.color = new Color(0.2f, 0.8f, 0.2f);
-        scoreObj.transform.SetParent(entry.transform, false);
-        
-        return entry;
-    }
-    
-    GameObject CreateEmptyLeaderboardEntry(int rank)
-    {
-        GameObject entry = new GameObject($"EmptyEntry_{rank}");
-        RectTransform rect = entry.AddComponent<RectTransform>();
-        rect.sizeDelta = new Vector2(400, 40);
-        
-        HorizontalLayoutGroup layout = entry.AddComponent<HorizontalLayoutGroup>();
-        layout.childAlignment = TextAnchor.MiddleLeft;
-        layout.spacing = 20;
-        layout.padding = new RectOffset(10, 10, 5, 5);
-        
-        // Sıra numarası
-        GameObject rankObj = new GameObject("Rank");
-        TextMeshProUGUI rankText = rankObj.AddComponent<TextMeshProUGUI>();
-        rankText.text = $"{rank}.";
-        rankText.fontSize = 18;
-        rankText.color = new Color(0.5f, 0.5f, 0.5f);
-        rankObj.transform.SetParent(entry.transform, false);
-        
-        // Boş metin
-        GameObject nameObj = new GameObject("Name");
-        TextMeshProUGUI nameText = nameObj.AddComponent<TextMeshProUGUI>();
-        nameText.text = "---";
-        nameText.fontSize = 18;
-        nameText.color = new Color(0.5f, 0.5f, 0.5f);
-        nameObj.transform.SetParent(entry.transform, false);
-        
-        return entry;
     }
 }

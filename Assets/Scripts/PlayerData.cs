@@ -4,14 +4,14 @@ using System;
 public class PlayerData : IComparable<PlayerData>
 {
     public string name;
-    public string phone;
+    public string email;
     public int score;
     public DateTime date;
 
-    public PlayerData(string name, string phone, int score)
+    public PlayerData(string name, string email, int score)
     {
         this.name = name;
-        this.phone = phone;
+        this.email = email;
         this.score = score;
         this.date = DateTime.Now;
     }
