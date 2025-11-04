@@ -22,11 +22,15 @@ public class GameManager2D : MonoBehaviour
     private float lastCatchTime;
     private int currentCombo = 0;
     
+    [Header("Referanslar")]
     private BasketController2D basketController;
     private ObjectSpawner2D spawner;
+    private MenuManager menuManager;
+    
     private float timeRemaining;
     private int score = 0;
     private bool gameStarted = false;
+    private string currentPlayerName;
     
     void Awake()
     {
@@ -37,8 +41,17 @@ public class GameManager2D : MonoBehaviour
     {
         basketController = FindObjectOfType<BasketController2D>();
         spawner = FindObjectOfType<ObjectSpawner2D>();
-        spawner.enabled = false;
+        menuManager = FindObjectOfType<MenuManager>();
         
+        // Spawner başlangıçta kapalı
+        if (spawner) spawner.enabled = false;
+        
+        // MenuManager oyunu başlatacak
+    }
+    
+    public void StartGameWithPlayer(string playerName)
+    {
+        currentPlayerName = playerName;
         StartCoroutine(WaitForUserAndStart());
     }
     
@@ -51,7 +64,7 @@ public class GameManager2D : MonoBehaviour
         }
         
         // Kullanıcı algılandı, oyunu başlat
-        yield return new WaitForSeconds(1f); // Kısa bir bekleme
+        yield return new WaitForSeconds(0.5f);
         StartGame();
     }
     
@@ -60,6 +73,10 @@ public class GameManager2D : MonoBehaviour
         spawner.enabled = true;
         gameStarted = true;
         timeRemaining = gameDuration;
+        score = 0;
+        currentCombo = 0;
+        comboMultiplier = 1;
+        UpdateUI();
     }
     
     void Update()
@@ -117,17 +134,36 @@ public class GameManager2D : MonoBehaviour
         gameStarted = false;
         spawner.enabled = false;
         
-        // Oyun sonu - sadece spawner'ı durdur
-        Debug.Log($"Oyun Bitti! Skor: {score}");
+        Debug.Log($"Oyun Bitti! {currentPlayerName} - Skor: {score}");
         
-        // TODO: Oyun sonu UI'ı eklenebilir
-        StartCoroutine(RestartGameAfterDelay());
+        // MenuManager'a oyunun bittiğini bildir
+        if (menuManager)
+        {
+            menuManager.OnGameEnded(score);
+        }
     }
     
-    IEnumerator RestartGameAfterDelay()
+    // Oyunu sıfırlama metodu (sahne yenileme yerine)
+    public void ResetGame()
     {
-        yield return new WaitForSeconds(3f);
-        UnityEngine.SceneManagement.SceneManager.LoadScene(
-            UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
+        score = 0;
+        currentCombo = 0;
+        comboMultiplier = 1;
+        timeRemaining = gameDuration;
+        gameStarted = false;
+        
+        // Spawner'ı temizle
+        if (spawner)
+        {
+            spawner.enabled = false;
+            // Sahnedeki tüm düşen nesneleri temizle
+            FallingObject2D[] fallingObjects = FindObjectsOfType<FallingObject2D>();
+            foreach (var obj in fallingObjects)
+            {
+                Destroy(obj.gameObject);
+            }
+        }
+        
+        UpdateUI();
     }
 }

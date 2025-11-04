@@ -15,24 +15,26 @@ This is a Unity 2022.3.62f3 project called "DropCatch" - a Kinect-enabled 2D cat
 - Located in `Assets/K2Examples/KinectScripts/` - extensive Kinect v2 wrapper library
 
 ### Game Components
-- **GameManager2D**: Main game controller handling score, timer, combo system, and calibration flow
-- **BasketController2D**: Translates Kinect elbow/hand positions to 2D basket movement with calibration
+- **GameManager2D**: Main game controller handling score, timer, combo system, and game flow
+- **BasketController2D**: Translates Kinect elbow positions to 2D basket movement
 - **FallingObject2D**: Physics-based falling objects with collision detection
 - **ObjectSpawner2D**: Spawns objects with increasing difficulty over time
-- **PhysicalBasketDetector**: Advanced detection system for determining when player is "holding" basket with multiple modes
-- **BasketDebugUI**: Real-time debug interface displaying detailed hand tracking and basket detection status
-- **KinectSmoothingManager**: Manages smoothing parameters to reduce Kinect tracking jitter
+- **PhysicalBasketDetector**: Detects basket holding state using elbow object positions
+- **BasketDebugUI**: Real-time debug interface for tracking diagnostics
+- **MenuManager**: Handles main menu, player registration, and game over sequence
+- **LeaderboardManager**: Manages top 10 high scores with local storage
+- **PlayerData**: Player information structure (name, phone, score)
 
 ### Key Systems
-1. **Calibration System**: User must be detected and calibrate their center position before gameplay
-2. **Basket Detection System**: PhysicalBasketDetector determines if player is "holding" the basket
-   - **Easy Mode**: Basket turns green when both elbows/hands are visible (default)
-   - **Advanced Mode**: Checks hand distance, height, state, and position for realistic detection
-   - **Position Memory**: Maintains basket position briefly when joints disappear to prevent jumping
-   - **Tracking Priority**: Elbows → Hands (elbows are more stable and visible)
-3. **Movement Mapping**: Kinect 3D coordinates → 2D screen coordinates with smooth interpolation
+1. **Menu System**: Player registration with name/phone, leaderboard display, game flow management
+2. **Basket Detection System**: PhysicalBasketDetector uses elbow joint positions
+   - Tracks ElbowLeft and ElbowRight objects controlled by JointOverlayer
+   - Simple active/inactive state detection
+   - No calibration required
+3. **Movement Mapping**: Direct elbow position to basket position with scale factor
 4. **Combo System**: Consecutive catches multiply score up to 5x
-5. **Visual Feedback**: Basket color indicates state - white (normal), blue (hands visible but not holding), green (holding)
+5. **Visual Feedback**: Basket color indicates state - white (normal), green (holding)
+6. **Leaderboard**: Local storage of top 10 players with PlayerPrefs
 
 ## Common Development Commands
 
