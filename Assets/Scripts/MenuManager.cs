@@ -3,18 +3,21 @@ using UnityEngine.UI;
 using TMPro;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.Serialization;
 
 public class MenuManager : MonoBehaviour
 {
     [Header("Panel Referansları")]
     public GameObject menuPanel;
     public GameObject gameOverPanel;
+    [FormerlySerializedAs("KVKKPanel")] public GameObject kvkkPanel;
     
     [Header("Kayıt Form Elemanları")]
     public TMP_InputField nameInput;
     public TMP_InputField emailInput;
     public Button startButton;
     public TextMeshProUGUI errorText;
+    public TextMeshProUGUI kvvkCheckBox;
     
     [Header("Oyun Bitiş")]
     public TextMeshProUGUI[] leaderboardTexts; // 10 adet text (1. den 10. ya kadar)
@@ -106,6 +109,16 @@ public class MenuManager : MonoBehaviour
     public void OnStartButtonClick()
     {
         OnStartButtonClicked();
+    }
+
+    public void KvkkPanelOpen()
+    {
+        kvkkPanel.SetActive(true);
+    }
+    public void KvkkPanelClose()
+    {
+        kvkkPanel.SetActive(false);
+        kvvkCheckBox.gameObject.SetActive(true);
     }
     
     void OnStartButtonClicked()

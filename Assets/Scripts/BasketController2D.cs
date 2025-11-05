@@ -9,7 +9,6 @@ public class BasketController2D : MonoBehaviour
     [Header("Sepet Ayarları")]
     public Transform basket2D;
     public float horizontalRange = 8f;
-    public SpriteRenderer basketSprite;
     
     
     [Header("Hareket Ayarları")]
@@ -24,10 +23,6 @@ public class BasketController2D : MonoBehaviour
     [Range(1f, 20f)]
     public float smoothingSpeed = 10f;
     
-    [Header("Görsel Feedback")]
-    public Color normalColor = Color.white;
-    public Color holdingColor = Color.green;
-    public Color notDetectedColor = Color.red;
     
     private bool isHoldingBasket = false;
     
@@ -46,7 +41,6 @@ public class BasketController2D : MonoBehaviour
     {
         if(!kinectManager || !kinectManager.IsUserDetected() || !basketDetector)
         {
-            basketSprite.color = notDetectedColor;
             return;
         }
         
@@ -57,8 +51,6 @@ public class BasketController2D : MonoBehaviour
         float targetX = CalculateTargetPosition();
         MoveBasket(targetX);
         
-        // Görsel feedback
-        UpdateVisualFeedback();
     }
     
     float CalculateTargetPosition()
@@ -86,17 +78,6 @@ public class BasketController2D : MonoBehaviour
         basket2D.position = new Vector2(newX, currentPos.y);
     }
     
-    void UpdateVisualFeedback()
-    {
-        if(isHoldingBasket)
-        {
-            basketSprite.color = holdingColor; // Yeşil - sepet tutuluyorken
-        }
-        else
-        {
-            basketSprite.color = normalColor; // Beyaz - normal durum
-        }
-    }
     
     
     // Debug ve monitoring için public methodlar
