@@ -2071,7 +2071,7 @@ MonoBehaviour:
   endGamePanelDuration: 5
   gameDuration: 60
   basePoints: 10
-  requireTwoPlayers: 0
+  requireTwoPlayers: 1
   comboResetTime: 2
 --- !u!114 &274657971
 MonoBehaviour:
@@ -6203,7 +6203,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerIndex: 1
-  leftElbowObject: {fileID: 1461528805}
+  leftElbowObject: {fileID: 1499405081}
   rightElbowObject: {fileID: 622380721}
   requireBothElbows: 1
 --- !u!114 &885532662
@@ -11857,7 +11857,7 @@ MonoBehaviour:
   maxLeftRightDistance: 0
   maxTrackedUsers: 2
   showTrackedUsersOnly: 1
-  userDetectionOrder: 1
+  userDetectionOrder: 2
   centralPosition: {x: 0, y: 0, z: 0}
   ignoreInferredJoints: 1
   ignoreZCoordinates: 1
@@ -11913,7 +11913,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   foregroundCamera: {fileID: 2043392929}
   playerIndex: 0
-  trackedJoint: 5
+  trackedJoint: 9
   overlayObject: {fileID: 1759114949}
   smoothFactor: 1
 --- !u!114 &1759113710
@@ -11930,7 +11930,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   foregroundCamera: {fileID: 2043392929}
   playerIndex: 0
-  trackedJoint: 9
+  trackedJoint: 5
   overlayObject: {fileID: 1461528805}
   smoothFactor: 1
 --- !u!114 &1759113711
