@@ -200,7 +200,10 @@ public class MenuManager : MonoBehaviour
         }
         
         menuPanel.SetActive(false);
-        
+
+        // 2 OYUNCULU MOD: MenuManager artık kullanılmıyor
+        // Oyun Space tuşu ile başlatılıyor (GameManager2D)
+        /*
         // GameManager'a oyunu başlatmasını söyle
         if (gameManager)
         {
@@ -211,16 +214,25 @@ public class MenuManager : MonoBehaviour
         {
             Debug.LogError("MenuManager: GameManager bulunamadı!");
         }
+        */
+
+        Debug.Log("2 Oyunculu Mod: Menü kapalı, Space tuşuna basarak oyunu başlatın!");
     }
     
     public void OnGameEnded(int finalScore)
     {
+        // 2 OYUNCULU MOD: Bu metod artık kullanılmıyor
+        // GameManager2D kendi bitiş panelini gösteriyor
+        Debug.LogWarning("OnGameEnded çağrıldı ama 2 oyunculu modda kullanılmıyor!");
+
+        /*
         // Oyuncu verisini oluştur ve kaydet
         PlayerData playerData = new PlayerData(currentPlayerName, currentPlayerEmail, finalScore);
         leaderboardManager.AddScore(playerData);
-        
+
         // Oyun bitiş ekranını göster
         ShowGameOverScreen();
+        */
     }
     
     void ShowGameOverScreen()

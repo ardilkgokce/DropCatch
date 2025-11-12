@@ -13,6 +13,7 @@ public class FallingObject2D : MonoBehaviour
     
     void Start()
     {
+        fallSpeed = Random.Range(2f, 5f);
         rb = GetComponent<Rigidbody2D>();
         rb.velocity = Vector2.down * fallSpeed;
         
@@ -24,21 +25,33 @@ public class FallingObject2D : MonoBehaviour
     {
         if(other.CompareTag("Basket"))
         {
-            // Puan ekle
-            GameManager2D.Instance.AddScore(pointValue);
-            
+            // Hangi oyuncunun sepeti olduğunu belirle
+            PlayerBasket playerBasket = other.GetComponent<PlayerBasket>();
+
+            if (playerBasket != null)
+            {
+                // Player-specific puan ekle
+                GameManager2D.Instance.AddScore(playerBasket.playerIndex, pointValue);
+            }
+            else
+            {
+                // Fallback: PlayerBasket componenti yoksa varsayılan olarak Player 0'a ekle
+                Debug.LogWarning("Basket'te PlayerBasket componenti bulunamadı! Player 0'a puan ekleniyor.");
+                GameManager2D.Instance.AddScore(0, pointValue);
+            }
+
             // Efekt oluştur
             if(collectEffect)
             {
                 Instantiate(collectEffect, transform.position, Quaternion.identity);
             }
-            
+
             // Ses çal
             if(collectSound)
             {
                 AudioSource.PlayClipAtPoint(collectSound, transform.position);
             }
-            
+
             Destroy(gameObject);
         }
         else if(other.CompareTag("DeathZone"))
