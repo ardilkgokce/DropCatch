@@ -2071,7 +2071,7 @@ MonoBehaviour:
   endGamePanelDuration: 5
   gameDuration: 60
   basePoints: 10
-  requireTwoPlayers: 1
+  requireTwoPlayers: 0
   comboResetTime: 2
 --- !u!114 &274657971
 MonoBehaviour:
@@ -2597,7 +2597,7 @@ Transform:
   m_GameObject: {fileID: 342597738}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 8.875, y: 12, z: 0}
+  m_LocalPosition: {x: 10.875, y: 12.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2623,7 +2623,7 @@ MonoBehaviour:
   - {fileID: 1871340867945030492, guid: 85e3ccd8c0f4c4d4bb9fd261df5b3101, type: 3}
   - {fileID: 1871340867945030492, guid: aeebd43624429df4da0a1126044165b4, type: 3}
   - {fileID: 1871340867945030492, guid: 0129e6259ee7c9d4fb3ec30361dca0cb, type: 3}
-  spawnRangeX: 8
+  spawnRangeX: 10
   spawnRate: 0.75
 --- !u!1 &353446419
 GameObject:
@@ -5773,7 +5773,7 @@ Transform:
   m_GameObject: {fileID: 821549631}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -2, z: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 1}
   m_LocalScale: {x: 2.25, y: 2.25, z: 2.25}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -6069,7 +6069,7 @@ Transform:
   m_GameObject: {fileID: 885532656}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 8.45, y: -7.66, z: 0}
+  m_LocalPosition: {x: 10.875, y: -10, z: 0}
   m_LocalScale: {x: 0.55, y: 0.55, z: 0.55}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -6089,7 +6089,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerIndex: 1
   basket2D: {fileID: 885532657}
-  horizontalRange: 5
+  horizontalRange: 9
   coordinateScale: 10
   movementSensitivity: 0.175
   smoothingSpeed: 20
@@ -7140,7 +7140,7 @@ Transform:
   m_GameObject: {fileID: 978773159}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 19, y: 0, z: 0}
+  m_LocalPosition: {x: 22, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -10810,7 +10810,7 @@ Transform:
   m_GameObject: {fileID: 1599298572}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -7.18, y: -7.66, z: 0}
+  m_LocalPosition: {x: -10.875, y: -10, z: 0}
   m_LocalScale: {x: 0.55, y: 0.55, z: 0.55}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -10927,7 +10927,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerIndex: 0
   basket2D: {fileID: 1599298573}
-  horizontalRange: 5
+  horizontalRange: 9
   coordinateScale: 10
   movementSensitivity: 0.175
   smoothingSpeed: 20
@@ -11062,7 +11062,7 @@ Transform:
   m_GameObject: {fileID: 1637656408}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -19, y: 0, z: 0}
+  m_LocalPosition: {x: -22, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -14120,7 +14120,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 10
+  orthographic size: 12.16
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
@@ -14481,8 +14481,8 @@ Transform:
   m_GameObject: {fileID: 2077783406}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -10, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 0, y: -12.5, z: 0}
+  m_LocalScale: {x: 1.4001, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 648649701}
@@ -15007,7 +15007,7 @@ Transform:
   m_GameObject: {fileID: 2116622861}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -8.875, y: 12, z: 0}
+  m_LocalPosition: {x: -10.875, y: 12.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -15033,7 +15033,7 @@ MonoBehaviour:
   - {fileID: 1871340867945030492, guid: 85e3ccd8c0f4c4d4bb9fd261df5b3101, type: 3}
   - {fileID: 1871340867945030492, guid: aeebd43624429df4da0a1126044165b4, type: 3}
   - {fileID: 1871340867945030492, guid: 0129e6259ee7c9d4fb3ec30361dca0cb, type: 3}
-  spawnRangeX: 8
+  spawnRangeX: 10
   spawnRate: 0.75
 --- !u!1 &2126446601
 GameObject:
