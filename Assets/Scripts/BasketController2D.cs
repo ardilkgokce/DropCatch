@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class BasketController2D : MonoBehaviour
 {
@@ -13,6 +14,10 @@ public class BasketController2D : MonoBehaviour
     [Header("Sepet Ayarları")]
     public Transform basket2D;
     public float horizontalRange = 8f;
+
+    [Header("Sprite Değişim Sistemi")]
+    [Tooltip("Boştan doluya doğru sıralı sprite listesi (0 = boş, son = dolu)")]
+    public List<Sprite> basketSprites = new List<Sprite>();
     
     
     [Header("Hareket Ayarları")]
@@ -26,6 +31,10 @@ public class BasketController2D : MonoBehaviour
     [Tooltip("Smoothing hızı (1 = smoothing yok, 20 = çok smooth)")]
     [Range(1f, 20f)]
     public float smoothingSpeed = 10f;
+
+    // Sprite sistemi için private değişkenler
+    private SpriteRenderer spriteRenderer;
+    private int catchCount = 0;
 
     // Kalibrasyon ve pozisyon tracking
     private Vector3 startPosition;           // Basket'in başlangıç pozisyonu (scene'deki transform)
@@ -50,6 +59,27 @@ public class BasketController2D : MonoBehaviour
             // PhysicalBasketDetector'ın playerIndex'ini otomatik olarak ayarla
             basketDetector.playerIndex = playerIndex;
             Debug.Log($"Player {playerIndex} BasketController başlatıldı.");
+        }
+
+        // Sprite değişim sistemi için SpriteRenderer'ı al
+        if (basket2D != null)
+        {
+            spriteRenderer = basket2D.GetComponent<SpriteRenderer>();
+
+            if (spriteRenderer == null)
+            {
+                Debug.LogWarning($"Player {playerIndex}: basket2D üzerinde SpriteRenderer bulunamadı! Sprite değişim sistemi çalışmayacak.");
+            }
+            else if (basketSprites != null && basketSprites.Count > 0)
+            {
+                // İlk sprite'ı ayarla (boş sepet)
+                spriteRenderer.sprite = basketSprites[0];
+                Debug.Log($"Player {playerIndex}: Başlangıç sprite ayarlandı. Toplam {basketSprites.Count} sprite mevcut.");
+            }
+            else
+            {
+                Debug.LogWarning($"Player {playerIndex}: basketSprites listesi boş! Inspector'dan sprite'ları ekleyin.");
+            }
         }
     }
 
@@ -158,15 +188,50 @@ public class BasketController2D : MonoBehaviour
     {
         return basketDetector ? basketDetector.IsHoldingBasket : false;
     }
-    
+
     public float GetHandDistance()
     {
         return basketDetector ? basketDetector.HandDistance : 0f;
     }
-    
+
     public bool AreBothHandsClosed()
     {
         return basketDetector ? basketDetector.AreBothHandsClosed() : false;
+    }
+
+    /// <summary>
+    /// Bir obje yakalandığında FallingObject2D tarafından çağrılır
+    /// </summary>
+    public void OnObjectCaught()
+    {
+        catchCount++;
+        UpdateBasketSprite();
+    }
+
+    /// <summary>
+    /// Catch sayısına göre sepet sprite'ını günceller
+    /// </summary>
+    private void UpdateBasketSprite()
+    {
+        // Güvenlik kontrolleri
+        if (basketSprites == null || basketSprites.Count == 0)
+        {
+            Debug.LogWarning($"Player {playerIndex}: basketSprites listesi boş, sprite güncellenemiyor!");
+            return;
+        }
+
+        if (spriteRenderer == null)
+        {
+            Debug.LogWarning($"Player {playerIndex}: SpriteRenderer bulunamadı, sprite güncellenemiyor!");
+            return;
+        }
+
+        // Her catch için bir sprite ileri git
+        // Mathf.Min ile son sprite'a ulaşınca orada kal
+        int spriteIndex = Mathf.Min(catchCount, basketSprites.Count - 1);
+        spriteRenderer.sprite = basketSprites[spriteIndex];
+
+        Debug.Log($"Player {playerIndex}: Sepet sprite güncellendi! Catch: {catchCount}, Sprite Index: {spriteIndex}/{basketSprites.Count - 1}");
     }
 
     // Scene view'da hareket alanını göster

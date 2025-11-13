@@ -40,6 +40,17 @@ public class FallingObject2D : MonoBehaviour
                 GameManager2D.Instance.AddScore(0, pointValue);
             }
 
+            // Basket sprite'ını güncelle
+            BasketController2D basketController = other.GetComponentInParent<BasketController2D>();
+            if (basketController != null)
+            {
+                basketController.OnObjectCaught();
+            }
+            else
+            {
+                Debug.LogWarning("BasketController2D bulunamadı! Sprite güncellenemedi.");
+            }
+
             // Efekt oluştur
             if(collectEffect)
             {
