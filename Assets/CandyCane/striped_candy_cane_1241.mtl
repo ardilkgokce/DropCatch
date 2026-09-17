@@ -1,0 +1,17 @@
+newmtl striped_candy_cane_1241_MatSG_Mat
+Pr 0.000
+Ni 1.600
+Ka 0 0 0
+Pm 0
+d 1.0
+Ke 0.0
+Kd 0 0 0
+adobe_map_normal striped_candy_cane_1241/striped_candy_cane_1241_Mat_normal.png
+map_Kd striped_candy_cane_1241/striped_candy_cane_1241_Mat_baseColor.png
+Tr 0
+illum 7
+Ks 1 1 1
+adobe_interior_color 1.0 1.0 1.0
+adobe_density 0
+Ns 16
+adobe_translucence 0.0

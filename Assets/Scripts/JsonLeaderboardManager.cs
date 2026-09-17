@@ -5,7 +5,8 @@ using System.IO;
 
 public class JsonLeaderboardManager : MonoBehaviour
 {
-    private const string FILENAME = "leaderboard.json";
+    [Tooltip("persistentDataPath altındaki JSON dosya adı (farklı oyunlar için farklı dosya kullanılabilir)")]
+    public string fileName = "leaderboard.json";
     private const int MAX_ENTRIES = 10;
     
     private List<PlayerData> leaderboard = new List<PlayerData>();
@@ -14,7 +15,8 @@ public class JsonLeaderboardManager : MonoBehaviour
     void Awake()
     {
         // JSON dosyasının yolu
-        filePath = Path.Combine(Application.persistentDataPath, FILENAME);
+        if (string.IsNullOrWhiteSpace(fileName)) fileName = "leaderboard.json";
+        filePath = Path.Combine(Application.persistentDataPath, fileName);
         Debug.Log($"Leaderboard JSON dosya yolu: {filePath}");
         
         LoadLeaderboard();

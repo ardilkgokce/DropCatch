@@ -60,7 +60,8 @@ public class FallingObject2D : MonoBehaviour
             // Ses çal
             if(collectSound)
             {
-                AudioSource.PlayClipAtPoint(collectSound, transform.position);
+                float volume = MusicManager.Instance != null ? MusicManager.Instance.sfxVolume : 1.0f;
+                AudioSource.PlayClipAtPoint(collectSound, transform.position, volume);
             }
 
             Destroy(gameObject);

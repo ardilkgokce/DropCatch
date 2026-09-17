@@ -19,6 +19,12 @@ public class GameManager2D : MonoBehaviour
     [Header("UI Elemanları - Paylaşılan")]
     public TextMeshProUGUI timerText;
 
+    [Header("Start Paneli")]
+    public GameObject startPanel;
+    public GameObject menuPanel;
+    public GameObject candyObject;
+    public GameObject backDrop;
+
     [Header("Bitiş Paneli")]
     public GameObject endGamePanel;
     public TextMeshProUGUI endGameScore_P0;
@@ -45,6 +51,7 @@ public class GameManager2D : MonoBehaviour
     private int[] currentCombo = new int[2];
 
     [Header("Referanslar")]
+    public MusicManager musicManager;
     private ObjectSpawner2D[] spawners;
 
     private float timeRemaining;
@@ -87,6 +94,63 @@ public class GameManager2D : MonoBehaviour
         }
     }
     
+    /// <summary>
+    /// StartButton'a basıldığında çağrılır (Unity Inspector'dan)
+    /// </summary>
+    public void OnStartButtonPressed()
+    {
+        Debug.Log("GameManager2D: Start button basıldı!");
+
+        // StartPanel'i kapat
+        if (startPanel)
+        {
+            startPanel.SetActive(false);
+            Debug.Log("GameManager2D: StartPanel kapatıldı");
+        }
+
+        // MenuPanel'i kapat
+        if (menuPanel)
+        {
+            StartCoroutine(CloseMenuPanel());
+        }
+
+        if (backDrop)
+        {
+            backDrop.SetActive(false);
+        }
+
+        // Candy objesini aktif et
+        if (candyObject)
+        {
+            candyObject.SetActive(true);
+            Debug.Log("GameManager2D: Candy objesi aktif edildi");
+        }
+    }
+
+    /// <summary>
+    /// MenuPanel'i fade out ile kapatır
+    /// </summary>
+    IEnumerator CloseMenuPanel()
+    {
+        CanvasGroup canvasGroup = menuPanel.GetComponent<CanvasGroup>();
+
+        if (canvasGroup != null)
+        {
+            float fadeTime = 0.5f;
+            float elapsedTime = 0;
+
+            while (elapsedTime < fadeTime)
+            {
+                canvasGroup.alpha = Mathf.Lerp(1, 0, elapsedTime / fadeTime);
+                elapsedTime += Time.deltaTime;
+                yield return null;
+            }
+        }
+
+        menuPanel.SetActive(false);
+        Debug.Log("GameManager2D: MenuPanel kapatıldı. Space tuşuna basarak oyunu başlatın!");
+    }
+
     // 2 oyunculu mod için oyun başlatma (menüsüz)
     void CheckAndStartGame()
     {
@@ -225,6 +289,11 @@ public class GameManager2D : MonoBehaviour
                 EndGame();
             }
         }
+
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        }
     }
     
     // Player-specific scoring
@@ -331,6 +400,21 @@ public class GameManager2D : MonoBehaviour
                 endGameScore_P1.text = $"Player 2\n{scores[1]}";
             }
 
+            // Candy objesini deaktif et
+            if (candyObject)
+            {
+                candyObject.SetActive(false);
+                Debug.Log("GameManager2D: Candy objesi deaktif edildi");
+            }
+
+            // Müzik sesini azalt ve endgame sesini çal
+            if (musicManager)
+            {
+                musicManager.SetMusicVolume(true); // Kısılmış volume
+                musicManager.PlayEndGameSound();
+                Debug.Log("EndgameSound Played");
+            }
+
             Debug.Log($"Bitiş paneli {endGamePanelDuration} saniye gösterilecek (veya Space'e basın)");
         }
     }
@@ -341,6 +425,12 @@ public class GameManager2D : MonoBehaviour
     void CloseEndGamePanel()
     {
         Debug.Log("Bitiş paneli kapatıldı. Sahne yenileniyor...");
+
+        // Müzik volume'ü normale döndür
+        if (musicManager)
+        {
+            musicManager.SetMusicVolume(false); // Normal volume
+        }
 
         // Sahneyi yeniden yükle (tüm değişkenler sıfırlanır, oyuncular yeniden kalibre edilir)
         string currentSceneName = SceneManager.GetActiveScene().name;

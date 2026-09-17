@@ -42,7 +42,10 @@ public class BasketController2D : MonoBehaviour
     private bool isCalibrated = false;       // Kalibrasyon yapıldı mı?
 
     private bool isHoldingBasket = false;
-    
+
+    /// <summary>Kalibrasyon yapıldı mı (dış sistemler tekrar kalibrasyon gerekip gerekmediğini anlamak için okur)</summary>
+    public bool IsCalibrated => isCalibrated;
+
     void Start()
     {
         kinectManager = KinectManager.Instance;

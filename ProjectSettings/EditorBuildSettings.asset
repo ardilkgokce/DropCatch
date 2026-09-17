@@ -6,6 +6,6 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/BasketCatchGame.unity
-    guid: f85fa5a8417ce244b8a2cdfdaac46173
+    path: Assets/BurgerKing/Scenes/BurgerKingCatch.unity
+    guid: 962c0241e401392438675c2044d9b939
   m_configObjects: {}
